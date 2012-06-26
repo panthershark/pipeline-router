@@ -104,7 +104,7 @@ Router.prototype = {
         });
 
         return {
-        	urlformat: new RegExp('^' + urlformat.join('\\/')),
+        	urlformat: new RegExp('^' + urlformat.join('\\/') + '$'),
         	paramMap: paramMap
         };
     }
