@@ -7,7 +7,9 @@ var Router = function() {
 
     this.plRouter.on('end', function(err, data){ 
     	if (!err || !err.success) {
-    		// TODO: emit error
+    		var res = data[0].res;
+            res.writeHead(404);
+            res.end("No matching route");
     	}
     });
 }; 
