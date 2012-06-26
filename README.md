@@ -13,7 +13,7 @@ This routing module is targeted for speed hungry people that want to be closer t
 
 # Install
 ```
-npm install -----placeholder-----
+npm install pipeline-router
 ```
 
 # Example
@@ -21,7 +21,7 @@ This example is in the tests folder.  Here is a simple http router.
 
 ``` javascript
 var http = require('http'),
-	Router = require('../index.js');
+	Router = require('pipeline-router');
 
 var routerFactory = {
 	create: function() {

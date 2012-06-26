@@ -1,8 +1,8 @@
 {
-  "name": "router",
+  "name": "pipeline-router",
    "version": "0.1.0",
    "main": "index",
-   "description": "Node.js module for simplifying http routing for your server without an accompanying framework.",
+   "description": "Simplified and fast routing for your server without an accompanying framework.",
    "keywords": [
        "node",
        "router",
