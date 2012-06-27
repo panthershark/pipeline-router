@@ -1,4 +1,5 @@
 var _ = require('lodash'),
+    bodyParser = require('connect').bodyParser(),
 	pipeline = require('node-pipeline');
 
 var Router = function() {
@@ -49,7 +50,16 @@ Router.prototype = {
 
                 // send to handler
                 req.params = that.parseUrl(req.url, options.paramMap);
-                callback(req, res);
+
+                // parse body on post
+                if (req.method == 'POST') {
+                    bodyParser(req, res, function() {
+                        callback(req, res);
+                    });
+                }
+                else {
+                    callback(req, res);
+                }
             }
             else {
                 next();
