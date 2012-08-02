@@ -1,5 +1,6 @@
 var util = require("util"),
     events = require('events'),
+    url = require('url'),
     _ = require('lodash'),
     bodyParser = require('connect').bodyParser(),
     pipeline = require('node-pipeline');
@@ -30,6 +31,8 @@ Router.prototype.dispatch = function(req, res) {
         }
     });
 
+    req.urlParsed = url.parse( req.headers.host + req.url);
+
     this.plRouter.execute({ 
         req: req,
         res: res
@@ -52,15 +55,16 @@ Router.prototype.use = function(method, urlformat, callback) {
 
     this.plRouter.use(function(data, next) {
         var req = data[0].req,
-            res = data[0].res;
+            res = data[0].res,
+            url = req.urlParsed.pathname;
 
-        if ( req.method === options.method && options.urlformat.test(req.url) ) {
+        if ( req.method === options.method && options.urlformat.test(url) ) {
             
             // stop trying to match
             next(null, options);
 
             // send to handler
-            req.params = that.parseUrl(req.url, options.paramMap);
+            req.params = that.parseUrl(url, options.paramMap);
 
             // parse body on post
             if (req.method == 'POST') {
