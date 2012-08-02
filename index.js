@@ -1,125 +1,135 @@
-var _ = require('lodash'),
+var util = require("util"),
+    events = require('events'),
+    _ = require('lodash'),
     bodyParser = require('connect').bodyParser(),
-	pipeline = require('node-pipeline');
+    pipeline = require('node-pipeline');
 
 var Router = function() {
+    var that = this;
+
     this.plRouter = pipeline.create();
     this.params = [];
 
-    this.plRouter.on('end', function(err, data){ 
-    	if (!err || !err.success) {
-    		var res = data[0].res;
-            res.writeHead(404);
-            res.end("No matching route");
-    	}
+    this.plRouter.on('error', function(err, results){ 
+        if (err) {
+            that.emit('error', err, results);
+        }
     });
 }; 
 
-Router.prototype = { 
-	dispatch: function(req, res) {
-		this.plRouter.execute({ 
-			req: req,
-			res: res
-		});
-	},
-    on: function(method, urlformat, callback) {
-        var options = {},
-        	that = this;
+util.inherits(Router, events.EventEmitter);
 
-        options.callback = _.last(arguments);
-        options.method = method.toUpperCase();
-        options.success = false;
+Router.prototype.dispatch = function(req, res) {
 
-        // support plain old regex
-        if (urlformat instanceof RegExp) {
-        	options.urlformat = urlformat;
+    this.plRouter.on('end', function(err, results) {
+        var res = results[0].res;
+
+        if (err && res.socket.bytesWritten == 0) {    
+            res.writeHead(404);
+            res.end("No matching route");
         }
-        else {
-        	_.extend(options, this.parseParams(urlformat));
-        }
+    });
 
-        this.plRouter.use(function(data, next) {
-            var req = data[0].req,
-                res = data[0].res;
+    this.plRouter.execute({ 
+        req: req,
+        res: res
+    });
+};
+Router.prototype.use = function(method, urlformat, callback) {
+    var options = {},
+        that = this;
 
-            if ( req.method === options.method && options.urlformat.test(req.url) ) {
-                
-                // stop trying to match
-                options.success = true;
-                next({ message: "Matched route", success: true }, options);
+    options.callback = _.last(arguments);
+    options.method = method.toUpperCase();
 
-                // send to handler
-                req.params = that.parseUrl(req.url, options.paramMap);
+    // support plain old regex
+    if (urlformat instanceof RegExp) {
+        options.urlformat = urlformat;
+    }
+    else {
+        _.extend(options, this.parseParams(urlformat));
+    }
 
-                // parse body on post
-                if (req.method == 'POST') {
-                    bodyParser(req, res, function() {
-                        callback(req, res);
-                    });
-                }
-                else {
+    this.plRouter.use(function(data, next) {
+        var req = data[0].req,
+            res = data[0].res;
+
+        if ( req.method === options.method && options.urlformat.test(req.url) ) {
+            
+            // stop trying to match
+            next(null, options);
+
+            // send to handler
+            req.params = that.parseUrl(req.url, options.paramMap);
+
+            // parse body on post
+            if (req.method == 'POST') {
+                bodyParser(req, res, function() {
                     callback(req, res);
-                }
+                });
             }
             else {
-                next();
+                callback(req, res);
             }
-        });
-    },
-    get: function(urlformat, callback) {
-    	Array.prototype.splice.call(arguments, 0, 0, 'get');
-        return this.on.apply(this, arguments);
-    },
-    post: function(urlformat, callback) {
-        Array.prototype.splice.call(arguments, 0, 0, 'post');
-        return this.on.apply(this, arguments);
-    },
-    param: function(name, regex) {
-        this.params.push({ name: name, regex: regex });
-    },
-    parseUrl: function(url, paramMap) {
-        var restParams = url.split('/'),
-            ret = {},
-            that = this;
+        }
+        else {
+            next();
+        }
+    });
+};
+Router.prototype.get = function(urlformat, callback) {
+    Array.prototype.splice.call(arguments, 0, 0, 'get');
+    return this.use.apply(this, arguments);
+};
+Router.prototype.post = function(urlformat, callback) {
+    Array.prototype.splice.call(arguments, 0, 0, 'post');
+    return this.use.apply(this, arguments);
+};
+Router.prototype.param = function(name, regex) {
+    this.params.push({ name: name, regex: regex });
+};
+Router.prototype.parseUrl = function(url, paramMap) {
+    var restParams = url.split('/'),
+        ret = {},
+        that = this;
 
-        _.each(paramMap, function(pmap, i) {
-        	var param = restParams[i];
-        	if (param && pmap) {
-        		var m = pmap.regex.exec(param);
-                if (m) {
-                    ret[pmap.name] = _.last(m);
-                }
-        	}
-        });
-        return ret;
+    _.each(paramMap, function(pmap, i) {
+        var param = restParams[i];
+        if (param && pmap) {
+            var m = pmap.regex.exec(param);
+            if (m) {
+                ret[pmap.name] = _.last(m);
+            }
+        }
+    });
+    return ret;
 
-    },
-    parseParams: function(s) {
-        var restParams = s ? s.split('/') : [],
-        	that = this,
-        	paramMap = [],
-        	urlformat = [];
+};
+Router.prototype.parseParams = function(s) {
+    var restParams = s ? s.split('/') : [],
+        that = this,
+        paramMap = [],
+        urlformat = [];
 
-        // replace named params with corresponding regexs and build paramMap.
-        _.each(restParams, function(str, i) {
-        	var param = _.find(that.params, function(p) { return str === ':' + p.name; });
+    // replace named params with corresponding regexs and build paramMap.
+    _.each(restParams, function(str, i) {
+        var param = _.find(that.params, function(p) { return str === ':' + p.name; });
 
-        	if (param) {
-        		paramMap.push(param);
-        		var rstr = param.regex.toString();
-        		urlformat.push(rstr.substring(1, rstr.length - 1));
-        	}
-        	else {
-        		paramMap.push(null);
-        		urlformat.push(str);
-        	}
-        });
+        if (param) {
+            paramMap.push(param);
+            var rstr = param.regex.toString();
+            urlformat.push(rstr.substring(1, rstr.length - 1));
+        }
+        else {
+            paramMap.push(null);
+            urlformat.push(str);
+        }
+    });
 
-        return {
-        	urlformat: new RegExp('^' + urlformat.join('\\/') + '$'),
-        	paramMap: paramMap
-        };
-    }
+    return {
+        urlformat: new RegExp('^' + urlformat.join('\\/') + '$'),
+        paramMap: paramMap
+    };
 };
 
 module.exports = Router;
