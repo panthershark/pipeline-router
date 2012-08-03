@@ -23,9 +23,10 @@ util.inherits(Router, events.EventEmitter);
 Router.prototype.dispatch = function(req, res) {
 
     this.plRouter.on('end', function(err, results) {
-        var res = results[0].res;
+        var matched = results[0].matched,
+            res = results[0].res;
 
-        if (err && res.socket.bytesWritten == 0) {    
+        if ( (!matched || err) && res.socket && res.socket.bytesWritten == 0) {    
             res.writeHead(404);
             res.end("No matching route");
         }
@@ -54,17 +55,19 @@ Router.prototype.use = function(method, urlformat, callback) {
     }
 
     this.plRouter.use(function(data, next) {
-        var req = data[0].req,
+        var matched = data[0].matched,
+            req = data[0].req,
             res = data[0].res,
-            url = req.urlParsed.pathname;
+            pathname = req.urlParsed.pathname;
 
-        if ( req.method === options.method && options.urlformat.test(url) ) {
+        if ( !matched && req.method === options.method && options.urlformat.test(pathname) ) {
             
             // stop trying to match
+            data[0].matched = true;
             next(null, options);
 
             // send to handler
-            req.params = that.parseUrl(url, options.paramMap);
+            req.params = that.parseUrl(pathname, options.paramMap);
 
             // parse body on post
             if (req.method == 'POST') {
