@@ -26,9 +26,10 @@ Router.prototype.dispatch = function(req, res) {
         var matched = results[0].matched,
             res = results[0].res;
 
-        if ( (!matched || err) && res.socket && res.socket.bytesWritten == 0) {    
-            res.writeHead(404);
-            res.end("No matching route");
+        if (!matched || err) {    
+            res.statusCode = 404;
+            res.write("No matching route or failed route");
+            res.end(err ? err.stack : '');
         }
     });
 
