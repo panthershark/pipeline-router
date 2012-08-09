@@ -115,20 +115,23 @@ Router.prototype.parseUrl = function(url, paramMap) {
     return ret;
 
 };
+
+var regexSplit = /(\?|\/)([^\?^\/]+)/g;
 Router.prototype.parseParams = function(s) {
-    var restParams = s ? s.split('/') : [],
+    var restParams = s ? s.match(regexSplit) : [],
         that = this,
         paramMap = [],
         urlformat = [];
 
     // replace named params with corresponding regexs and build paramMap.
     _.each(restParams, function(str, i) {
-        var param = _.find(that.params, function(p) { return str === ':' + p.name; });
+        var param = _.find(that.params, function(p) { return str.substring(1) === ':' + p.name; });
 
         if (param) {
             paramMap.push(param);
             var rstr = param.regex.toString();
-            urlformat.push(rstr.substring(1, rstr.length - 1));
+            urlformat.push('\\/' + str[0] === '?' ? '?' : ''); // push separator (double backslash escapes the ? or /)
+            urlformat.push(rstr.substring(1, rstr.length - 1));  // push regex
         }
         else {
             paramMap.push(null);
@@ -137,7 +140,7 @@ Router.prototype.parseParams = function(s) {
     });
 
     return {
-        urlformat: new RegExp('^' + urlformat.join('\\/') + '$'),
+        urlformat: new RegExp('^' + urlformat.join('') + '$'),
         paramMap: paramMap
     };
 };
