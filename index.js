@@ -34,7 +34,7 @@ Router.prototype.dispatch = function(req, res) {
     });
 
     // 'http://' is required as of 0.8.5
-    req.urlParsed = url.parse( '//' + req.headers.host.replace(/:\d+/, '') + req.url, true, true);
+    req.urlParsed = url.parse( 'http://' + req.headers.host.replace(/:\d+/, '') + req.url, true, true);
 
     this.plRouter.execute({ 
         req: req,
