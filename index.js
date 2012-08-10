@@ -130,7 +130,7 @@ Router.prototype.parseParams = function(s) {
         if (param) {
             paramMap.push(param);
             var rstr = param.regex.toString();
-            urlformat.push('\\/' + str[0] === '?' ? '?' : ''); // push separator (double backslash escapes the ? or /)
+            urlformat.push('\\/' + (str[0] === '?' ? '?' : '')); // push separator (double backslash escapes the ? or /)
             urlformat.push(rstr.substring(1, rstr.length - 1));  // push regex
         }
         else {
