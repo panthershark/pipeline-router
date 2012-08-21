@@ -103,6 +103,10 @@ Router.prototype.parseUrl = function(url, paramMap) {
         ret = {},
         that = this;
 
+    if (restParams[0] === "") {
+        restParams.splice(0, 1);
+    }
+
     _.each(paramMap, function(pmap, i) {
         var param = restParams[i];
         if (param && pmap) {
@@ -115,13 +119,20 @@ Router.prototype.parseUrl = function(url, paramMap) {
     return ret;
 
 };
+/** ------- **/
 
 var regexSplit = /(\?|\/)([^\?^\/]+)/g;
 Router.prototype.parseParams = function(s) {
-    var restParams = s ? s.match(regexSplit) : [],
+    s = s || '';
+    
+    var restParams = s.match(regexSplit),
         that = this,
         paramMap = [],
         urlformat = [];
+
+    if (!restParams || restParams.length === 0) {
+        restParams = [s];
+    }
 
     // replace named params with corresponding regexs and build paramMap.
     _.each(restParams, function(str, i) {
