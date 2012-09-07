@@ -2,8 +2,8 @@ var util = require("util"),
     events = require('events'),
     url = require('url'),
     _ = require('lodash'),
-    bodyParser = require('connect').bodyParser(),
-    pipeline = require('node-pipeline');
+    pipeline = require('node-pipeline'),
+    formaline = require('formaline');
 
 var Router = function() {
     var that = this;
@@ -74,9 +74,12 @@ Router.prototype.use = function(method, urlformat, callback) {
 
             // parse body on post
             if (req.method == 'POST') {
-                bodyParser(req, res, function() {
+                var form = new formaline({});
+                form.on('load', function() {
+                    req.body = arguments;
                     callback(req, res);
-                });
+                })
+                .parse(req, res);
             }
             else {
                 callback(req, res);
