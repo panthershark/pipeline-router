@@ -79,6 +79,10 @@ Router.prototype.use = function(method, urlformat, callback) {
                     req.body = arguments;
                     callback(req, res);
                 })
+                .on('error', function(err) {
+                    req.body = err;
+                    callback(req, res);
+                })
                 .parse(req, res);
             }
             else {
