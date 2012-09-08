@@ -10,6 +10,11 @@ var Router = function() {
 
     this.plRouter = pipeline.create();
     this.params = [];
+    this.parsed = false;
+
+    this.on('body', function() {
+        that.parsed = true;
+    });
 
     this.plRouter.on('error', function(err, results){ 
         if (err) {
@@ -21,6 +26,24 @@ var Router = function() {
 util.inherits(Router, events.EventEmitter);
 
 Router.prototype.dispatch = function(req, res) {
+    var that = this;
+
+    // parse body on post
+    if (req.method == 'POST') {
+        var form = new formaline({});
+        form.on('load', function() {
+            req.body = {};
+            _.each(arguments, function(arg) {
+                req.body[arg.name] = arg.value;
+            });
+            that.emit('body', req.body);
+        })
+        .on('error', function(err) {
+            req.body = err;
+            that.emit('body', err);
+        })
+        .parse(req, res);
+    }
 
     this.plRouter.on('end', function(err, results) {
         var matched = results[0].matched,
@@ -72,18 +95,10 @@ Router.prototype.use = function(method, urlformat, callback) {
             req.params = that.parseUrl(pathname, options.paramMap);
             req.query = req.urlParsed.query;
 
-            // parse body on post
-            if (req.method == 'POST') {
-                var form = new formaline({});
-                form.on('load', function() {
-                    req.body = arguments;
+            if (req.method == 'POST' && !that.parsed) {
+                that.on('body', function() {
                     callback(req, res);
-                })
-                .on('error', function(err) {
-                    req.body = err;
-                    callback(req, res);
-                })
-                .parse(req, res);
+                });
             }
             else {
                 callback(req, res);
