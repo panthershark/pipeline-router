@@ -1,6 +1,6 @@
 {
   "name": "pipeline-router",
-   "version": "0.5.6",
+   "version": "0.5.7",
    "main": "index",
    "description": "Simplified and fast routing for your server without an accompanying framework.",
    "keywords": [
@@ -31,9 +31,9 @@
     "test": "node /tests/example.js"
   },
   "dependencies": {
-    "formaline": "*",
-    "lodash": "0.7.0",
-    "node-pipeline": "*"
+    "formaline": "0.6.4",
+    "lodash": "0.8.2",
+    "node-pipeline": "0.4.1"
     },
   "devDependencies": {
     "optimist": "*"
