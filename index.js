@@ -3,7 +3,7 @@ var util = require("util"),
     url = require('url'),
     _ = require('lodash'),
     pipeline = require('node-pipeline'),
-    formaline = require('formaline');
+    formidable = require('formidable');
 
 var Router = function() {
     var that = this;
@@ -30,19 +30,20 @@ Router.prototype.dispatch = function(req, res) {
 
     // parse body on post
     if (req.method == 'POST') {
-        var form = new formaline({});
-        form.on('load', function() {
-            req.body = {};
-            _.each(arguments, function(arg) {
-                req.body[arg.name] = arg.value;
-            });
-            that.emit('body', req.body);
+        var form = new formidable.IncomingForm();
+
+        form.on('field', function(field, value) {
+            req.body = req.body || {};
+            req.body[field] = value;            
         })
         .on('error', function(err) {
             req.body = err;
             that.emit('body', err);
         })
-        .parse(req, res);
+        .on('end', function() {
+            that.emit('body', req.body);
+        })
+        .parse(req);
     }
 
     this.plRouter.on('end', function(err, results) {
