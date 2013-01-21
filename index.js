@@ -118,8 +118,31 @@ Router.prototype.post = function(urlformat, callback) {
     Array.prototype.splice.call(arguments, 0, 0, 'post');
     return this.use.apply(this, arguments);
 };
-Router.prototype.param = function(name, regex) {
-    this.params.push({ name: name, regex: regex });
+Router.prototype.param = function(arg0, arg1) {
+    var params = [];
+
+    if (_.isArray(arg0)) {
+        params = arg0;
+    }
+    else {  
+        // insert the single param to the array for concat below.
+        params.push({ name: arg0, regex: arg1 });
+    }
+
+    // convert nulls and strings to regex
+    _.each(params, function(p) {
+        // default null vals to catch all regex.
+        if (p.regex == null) {
+            p.regex = /(.*)/;
+        }
+        // convert string vals to regex.
+        else if (_.isString(p.regex)) {
+            p.regex = new RegExp(p.regex);
+        }
+    });
+
+    // add to the array of params for this instance
+    this.params = this.params.concat(params);
 };
 Router.prototype.parseUrl = function(url, paramMap) {
     var restParams = url.split('/'),
