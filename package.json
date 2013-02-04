@@ -1,22 +1,21 @@
 {
   "name": "pipeline-router",
-   "version": "0.7.0",
-   "main": "index",
-   "description": "Simplified and fast routing for your server without an accompanying framework.",
-   "keywords": [
-       "node",
-       "router",
-       "routing",
-       "director",
-       "express"
-   ],
-   "author": {
-       "name": "Tommy Messbauer",
-       "email": "tom.messbauer@gmail.com",
-       "web": "http://www.vast.com",
-       "twitter": "tommydudebreaux"
-   }, 
-   "license": "MIT",
+  "version": "0.7.0",
+  "main": "index",
+  "description": "Simplified and fast routing for your server without an accompanying framework.",
+  "keywords": [
+    "node",
+    "router",
+    "routing",
+    "director",
+    "express"
+  ],
+  "author": {
+    "name": "Tommy Messbauer",
+    "email": "tom.messbauer@gmail.com",
+    "url": "http://www.vast.com"
+  },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:tommydudebreaux/router.git"
@@ -34,12 +33,16 @@
     "formidable": "1.0.11",
     "lodash": "0.10.0",
     "node-pipeline": "0.4.1"
-    },
+  },
   "devDependencies": {
     "optimist": "*",
-    "tap": "*"
-  	},
+    "tap": "*",
+    "request": "*"
+  },
   "optionalDependencies": {},
-  "homepage": "http://vastdevblog.vast.com/"
+  "homepage": "http://vastdevblog.vast.com/",
+  "readme": "router\n========\n\nNode.js module for simplifying http routing for your server without having to sign up for the accompanying framework.  \n\nThis project strives to be a straight forward routing solution for common http applications where you need to parse urls and then activate some chain of logic.  Many other options either come with a much bigger framework or are trying to solve a bigger problem (like client side routing).\n\nThis routing module is targeted for speed hungry people that want to be closer to the metal.  If you are not that type of person, then use express.js.\n\n\n# Install\n```\nnpm install pipeline-router\n```\n\n# Example\nThis example is in the tests folder.  Here is a simple http router.\n\n``` javascript\nvar http = require('http'),\n\tRouter = require('pipeline-router');\n\nvar routerFactory = {\n\tcreate: function() {\n\t\tvar router = new Router();\n\n\t\trouter.param('zip', /zip-(\\d{5})/);\n\t\trouter.param('item', /(\\w*)/);\n\n\t\trouter.get('/foo/:zip/:item', function(req, res) {\n\t\t\tres.writeHead(200, { 'Content-Type': 'application/json' });\n\t        res.write(JSON.stringify(req.params));\n\t        res.end();\n\t\t});\n\n\t\trouter.get('/', function(req, res) {\n\t\t\tres.write(\"Home\");\n\t\t\tres.end();\n\t\t});\n\n\t\treturn router;\n\t}\n};\n\nvar server = http.createServer(function (req, res) {\n\tvar router = routerFactory.create();\n\n\trouter.dispatch(req, res);\n\n});\n\nserver.listen(3000);\n```",
+  "readmeFilename": "README.md",
+  "_id": "pipeline-router@0.7.0",
+  "_from": "pipeline-router"
 }
-
