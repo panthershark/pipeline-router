@@ -1,6 +1,6 @@
 {
   "name": "pipeline-router",
-   "version": "0.7.0",
+   "version": "0.8.0",
    "main": "index",
    "description": "Simplified and fast routing for your server without an accompanying framework.",
    "keywords": [
@@ -28,12 +28,12 @@
     "node": ">=0.6.0"
   },
   "scripts": {
-    "test": "node /tests/example.js"
+    "test": "node tests/21.js"
   },
   "dependencies": {
-    "formidable": "1.0.11",
-    "lodash": "0.10.0",
-    "node-pipeline": "0.4.1"
+    "formidable": "1.0.14",
+    "lodash": "1.2.1",
+    "node-pipeline": "0.5.x"
     },
   "devDependencies": {
     "optimist": "*",
