@@ -1,6 +1,6 @@
 {
   "name": "pipeline-router",
-   "version": "0.8.0",
+   "version": "1.0.0",
    "main": "index",
    "description": "Simplified and fast routing for your server without an accompanying framework.",
    "keywords": [
@@ -28,7 +28,7 @@
     "node": ">=0.6.0"
   },
   "scripts": {
-    "test": "node tests/21.js"
+    "test": "tape tests/*"
   },
   "dependencies": {
     "formidable": "1.0.14",
@@ -37,7 +37,8 @@
     },
   "devDependencies": {
     "optimist": "*",
-    "tap": "*"
+    "tape": "~1.0.4",
+    "hammock": "0.1.x"
   	},
   "optionalDependencies": {},
   "homepage": "http://vastdevblog.vast.com/"
