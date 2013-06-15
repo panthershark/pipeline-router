@@ -19,7 +19,7 @@
    "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:tommydudebreaux/router.git"
+    "url": "git@github.com:tommydudebreaux/pipeline-router.git"
   },
   "directories": {
     "tests": "tests"
