@@ -10,6 +10,7 @@ var Router = function() {
 
   this.plRouter = pipeline.create();
   this.params = [];
+  this.query = null;
   this.parsed = false;
   this.httpContext = null;
 
@@ -67,12 +68,13 @@ Router.prototype.dispatch = function(request, response) {
 
 
 
-Router.prototype.use = function(method, urlformat, callback) {
-  var options = {},
+Router.prototype.use = function(method, urlformat, options, callback) {
+  var options = options || {},
       that = this;
 
   options.callback = _.last(arguments);
   options.method = method.toUpperCase();
+  options.query = _.pick(this.query, options.query);
 
   // support plain old regex
   if (urlformat instanceof RegExp) {
@@ -88,24 +90,36 @@ Router.prototype.use = function(method, urlformat, callback) {
         pathname = httpContext.url.pathname;
 
     if ( !matched && httpContext.request.method === options.method && options.urlformat.test(pathname) ) {
-        
-      // stop trying to match
-      data[0].matched = true;
-      next(null, options);
+      
+      // rest matched. lets set flag
+      matched = true;
 
-      // send to handler
-      httpContext.params = that.parseUrl(pathname, options.paramMap);
+      // validate query against params.  if any of the regex fail, then matched will change to false.
+      _.each(options.query, function(regex, key) {
+        matched = matched && regex.test(httpContext.url.query[key]);
+      });
 
-      // TODO: validate query against params
-      httpContext.query = httpContext.url.query;
+      // stop trying to match if query matched too
+      if (matched) {
+        httpContext.query = httpContext.url.query;
+        data[0].matched = true;
+        next(null, options);
 
-      if (httpContext.request.method == 'POST' && !that.parsed) {
-        that.on('body', function() {
-          callback(httpContext);
-        });
+        // send to handler
+        httpContext.params = that.parseUrl(pathname, options.paramMap);
+
+
+        if (httpContext.request.method == 'POST' && !that.parsed) {
+          that.on('body', function() {
+            options.callback(httpContext);
+          });
+        }
+        else {
+          options.callback(httpContext);
+        }
       }
       else {
-        callback(httpContext);
+        next();
       }
     }
     else {
@@ -113,11 +127,11 @@ Router.prototype.use = function(method, urlformat, callback) {
     }
   });
 };
-Router.prototype.get = function(urlformat, callback) {
+Router.prototype.get = function(urlformat, options, callback) {
   Array.prototype.splice.call(arguments, 0, 0, 'get');
   return this.use.apply(this, arguments);
 };
-Router.prototype.post = function(urlformat, callback) {
+Router.prototype.post = function(urlformat, options, callback) {
   Array.prototype.splice.call(arguments, 0, 0, 'post');
   return this.use.apply(this, arguments);
 };
@@ -207,6 +221,11 @@ Router.prototype.parseParams = function(s) {
     urlformat: new RegExp('^' + urlformat.join('') + '$'),
     paramMap: paramMap
   };
+};
+
+Router.prototype.qparam = function(name, regex) {
+  this.query = this.query || {};
+  this.query[name] = regex;
 };
 
 module.exports = Router;
