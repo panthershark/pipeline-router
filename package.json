@@ -1,22 +1,22 @@
 {
   "name": "pipeline-router",
-   "version": "1.0.0",
-   "main": "index",
-   "description": "Simplified and fast routing for your server without an accompanying framework.",
-   "keywords": [
-       "node",
-       "router",
-       "routing",
-       "director",
-       "express"
-   ],
-   "author": {
-       "name": "Tommy Messbauer",
-       "email": "tom.messbauer@gmail.com",
-       "web": "http://www.vast.com",
-       "twitter": "tommydudebreaux"
-   }, 
-   "license": "MIT",
+  "version": "1.0.1",
+  "main": "index",
+  "description": "Simplified and fast routing for your server without an accompanying framework.",
+  "keywords": [
+    "node",
+    "router",
+    "routing",
+    "director",
+    "express"
+  ],
+  "author": {
+    "name": "Tommy Messbauer",
+    "email": "tom.messbauer@gmail.com",
+    "web": "http://www.vast.com",
+    "twitter": "tommydudebreaux"
+  },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git@github.com:tommydudebreaux/pipeline-router.git"
@@ -34,13 +34,12 @@
     "formidable": "1.0.14",
     "lodash": "1.2.1",
     "node-pipeline": "0.5.x"
-    },
+  },
   "devDependencies": {
     "optimist": "*",
     "tape": "~1.0.4",
     "hammock": "0.1.x"
-  	},
+  },
   "optionalDependencies": {},
   "homepage": "http://vastdevblog.vast.com/"
 }
-
