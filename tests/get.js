@@ -2,6 +2,7 @@ var Router = require('../index.js');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
 var test = require('tape').test;
+var util = require("util");
 
 var routerFactory = {
   create: function() {
@@ -62,6 +63,13 @@ test('Home route', function(t) {
     t.end();
   });
 
+  router.on('match', function(data) {
+    console.log(util.inspect(data));
+
+    t.ok(data.httpContext, 'Context should exist');
+    t.ok(data.matched, 'Route should match');
+  });
+  
   router.dispatch(req, res);
 });
 
@@ -82,6 +90,13 @@ test('Restful route', function(t) {
 
   });
 
+  router.on('match', function(data) {
+    console.log(util.inspect(data));
+
+    t.ok(data.httpContext, 'Context should exist');
+    t.ok(data.matched, 'Route should match');
+  });
+
   router.dispatch(req, res);
 });
 
@@ -100,6 +115,13 @@ test('Restful route with querystring validation - valid', function(t) {
     t.deepEqual(JSON.parse(data.body), { restparams: { zip: '12345' }, queryparams: { puppy: 'true' }}, 'Returned object from route should match gold.');
     t.end();
 
+  });
+
+  router.on('match', function(data) {
+    console.log(util.inspect(data));
+
+    t.ok(data.httpContext, 'Context should exist');
+    t.ok(data.matched, 'Route should match');
   });
 
   router.dispatch(req, res);
@@ -123,6 +145,43 @@ test('Restful route with querystring validation - invalid query value', function
     t.deepEqual(JSON.parse(data.body), {"zip":"12345","item":"dogs"}, 'Returned object from route should match gold.');
     t.end();
 
+  });
+
+  router.on('match', function(data) {
+    console.log(util.inspect(data));
+
+    t.ok(data.httpContext, 'Context should exist');
+    t.ok(data.matched, 'Route should match');
+  });
+
+  router.dispatch(req, res);
+});
+
+
+test('Restful route with querystring validation - omitted query value', function(t) {
+  var router = routerFactory.create();
+  var req = new MockRequest({
+        url: '/foo/zip-12345/dogs',
+        headers: { host: 'localhost' },
+        method: 'GET'
+    });
+  var res = new MockResponse(); 
+
+  res.on('end', function(err, data) {
+
+    t.notOk(err, 'Should not return err');
+
+    // gold value is the return of the item route, not the dogs route.
+    t.deepEqual(JSON.parse(data.body), {"zip":"12345","item":"dogs"}, 'Returned object from route should match gold.');
+    t.end();
+
+  });
+
+  router.on('match', function(data) {
+    console.log(util.inspect(data));
+
+    t.ok(data.httpContext, 'Context should exist');
+    t.ok(data.matched, 'Route should match');
   });
 
   router.dispatch(req, res);

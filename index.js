@@ -68,11 +68,11 @@ Router.prototype.dispatch = function(request, response) {
 
 
 
-Router.prototype.use = function(method, urlformat, options, callback) {
+Router.prototype.use = function(method, urlformat, options, handle) {
   var options = options || {},
       that = this;
 
-  options.callback = _.last(arguments);
+  options.handle = _.last(arguments);
   options.method = method.toUpperCase();
   options.query = _.pick(this.query, options.query);
 
@@ -83,6 +83,22 @@ Router.prototype.use = function(method, urlformat, options, callback) {
   else {
     _.extend(options, this.parseParams(urlformat));
   }
+
+  var emitEvaluateEvent = function(httpContext, matched) {
+    var data = {
+      method: method,
+      urlformat: urlformat,
+      options: options,
+      httpContext: httpContext,
+      matched: matched
+    };
+
+    that.emit('evaluate', data);
+
+    if (matched) {
+      that.emit('match', data);
+    }
+  };
 
   this.plRouter.use(function(data, next) {
     var matched = data[0].matched,
@@ -107,22 +123,24 @@ Router.prototype.use = function(method, urlformat, options, callback) {
 
         // send to handler
         httpContext.params = that.parseUrl(pathname, options.paramMap);
-
+        emitEvaluateEvent(httpContext, true);
 
         if (httpContext.request.method == 'POST' && !that.parsed) {
           that.on('body', function() {
-            options.callback(httpContext);
+            options.handle(httpContext);
           });
         }
         else {
-          options.callback(httpContext);
+          options.handle(httpContext);
         }
       }
       else {
+        emitEvaluateEvent(httpContext, false);
         next();
       }
     }
     else {
+      emitEvaluateEvent(httpContext, false);
       next();
     }
   });
