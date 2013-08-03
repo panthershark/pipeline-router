@@ -13,6 +13,7 @@ var Router = function() {
   this.query = null;
   this.parsed = false;
   this.httpContext = null;
+  this.timeout = 120000; // same as node socket timeout
 
   this.on('body', function() {
     that.parsed = true;
@@ -75,6 +76,7 @@ Router.prototype.use = function(method, urlformat, options, handle) {
   options.handle = _.last(arguments);
   options.method = method.toUpperCase();
   options.query = _.pick(this.query, options.query);
+  options.timeout = (options.timeout || this.timeout); // default 30s timeout
 
   // support plain old regex
   if (urlformat instanceof RegExp) {
@@ -124,6 +126,16 @@ Router.prototype.use = function(method, urlformat, options, handle) {
         // send to handler
         httpContext.params = that.parseUrl(pathname, options.paramMap);
         emitEvaluateEvent(httpContext, true);
+
+        if (options.timeout) {
+          setTimeout(function() {
+
+            var res = httpContext.response;
+            res.writeHead(500, { 'Content-Type': 'text/html' });
+            res.end('Request timed out');
+
+          }, options.timeout);
+        }
 
         if (httpContext.request.method == 'POST' && !that.parsed) {
           that.on('body', function() {
