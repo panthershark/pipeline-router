@@ -128,13 +128,17 @@ Router.prototype.use = function(method, urlformat, options, handle) {
         emitEvaluateEvent(httpContext, true);
 
         if (options.timeout) {
-          setTimeout(function() {
+          var res = httpContext.response;
+          var resTimeout = setTimeout(function() {
 
-            var res = httpContext.response;
-            res.writeHead(500, { 'Content-Type': 'text/html' });
+            if (!res.headersSent) {
+              res.writeHead(500, { 'Content-Type': 'text/html' });
+            }
             res.end('Request timed out');
 
           }, options.timeout);
+
+          res.on('finish', clearTimeout.bind(null, resTimeout));
         }
 
         if (httpContext.request.method == 'POST' && !that.parsed) {
