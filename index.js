@@ -7,13 +7,8 @@ var util = require("util"),
 
 var Router = function() {
   var that = this;
-
   this.plRouter = pipeline.create();
-  this.params = [];
-  this.query = null;
-  this.parsed = false;
-  this.httpContext = null;
-  this.timeout = 120000; // same as node socket timeout
+  this.reset();
 
   this.on('body', function() {
     that.parsed = true;
@@ -24,11 +19,22 @@ var Router = function() {
       that.emit('error', err, results);
     }
   });
+
 }; 
 
 util.inherits(Router, events.EventEmitter);
 
+Router.prototype.reset = function() {
+  this.plRouter.reset();
+  this.params = [];
+  this.query = null;
+  this.parsed = false;
+  this.httpContext = null;
+  this.timeout = 120000; // same as node socket timeout
+};
+
 Router.prototype.dispatch = function(request, response) {
+  this.reset();  // reset everything.
   var that = this;
   var httpContext = this.httpContext = new HttpContext(request, response);
 
@@ -57,7 +63,7 @@ Router.prototype.dispatch = function(request, response) {
     var matched = results[0].matched,
         res = results[0].httpContext.response;
 
-    if (!matched || err) {    
+    if ((!matched || err) && res) {    
       res.statusCode = 404;
       res.write("No matching route or failed route");
       res.end(err ? err.stack : '');
@@ -99,6 +105,7 @@ Router.prototype.use = function(method, urlformat, options, handle) {
 
     if (matched) {
       that.emit('match', data);
+      that.plRouter.end();
     }
   };
 
@@ -129,16 +136,19 @@ Router.prototype.use = function(method, urlformat, options, handle) {
 
         if (options.timeout) {
           var res = httpContext.response;
-          var resTimeout = setTimeout(function() {
 
-            if (!res.headersSent) {
-              res.writeHead(500, { 'Content-Type': 'text/html' });
-            }
-            res.end('Request timed out');
+          if (res) {
+            var resTimeout = setTimeout(function() {
 
-          }, options.timeout);
+              if (!res.headersSent) {
+                res.writeHead(500, { 'Content-Type': 'text/html' });
+              }
+              res.end('Request timed out');
 
-          res.on('finish', clearTimeout.bind(null, resTimeout));
+            }, options.timeout);
+
+            res.on('finish', clearTimeout.bind(null, resTimeout));
+          }
         }
 
         if (httpContext.request.method == 'POST' && !that.parsed) {
