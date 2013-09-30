@@ -1,6 +1,6 @@
 var util = require("util"),
     events = require('events'),
-    _ = require('lodash'),
+    _ = require('./lodash.custom.min.js'),
     HttpContext = require('./lib/httpcontext.js'),
     pipeline = require('node-pipeline'),
     formidable = require('formidable');
@@ -63,11 +63,12 @@ Router.prototype.dispatch = function(request, response) {
     var matched = results[0].matched,
         res = results[0].httpContext.response;
 
+    that.emit('end', err, results);
+
     if ((!matched || err) && res) {    
       res.statusCode = 404;
       res.write("No matching route or failed route");
       res.end(err ? err.stack : '');
-      that.emit('end', err, results);
     }
   });
 
