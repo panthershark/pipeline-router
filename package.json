@@ -32,13 +32,13 @@
   },
   "dependencies": {
     "formidable": "1.0.14",
-    "lodash": "~2.0.0",
-    "node-pipeline": "0.5.x"
+    "node-pipeline": "~0.5.2",
+    "lodash": "~2.2.0",
+    "hammock": "~0.1.0"
   },
   "devDependencies": {
     "optimist": "*",
-    "tape": "~1.0.4",
-    "hammock": "0.1.x"
+    "tape": "~1.0.4"
   },
   "optionalDependencies": {},
   "homepage": "http://vastdevblog.vast.com/"
