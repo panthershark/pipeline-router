@@ -34,7 +34,7 @@
     "formidable": "1.0.14",
     "node-pipeline": "~0.5.2",
     "lodash": "~2.2.0",
-    "hammock": "~0.1.0"
+    "hammock": "~0.1.1"
   },
   "devDependencies": {
     "optimist": "*",

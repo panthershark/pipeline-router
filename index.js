@@ -67,6 +67,7 @@ Router.prototype.dispatch = function(request, response) {
       res.statusCode = 404;
       res.write("No matching route or failed route");
       res.end(err ? err.stack : '');
+      that.emit('end', err, results);
     }
   });
 
