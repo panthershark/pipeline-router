@@ -28,9 +28,7 @@
     "node": ">=0.6.0"
   },
   "scripts": {
-    "test": "tape tests/*",
-    "postinstall": "lodash include=each,last,isString,isArray,last,find,pick,extend exports=node",
-    "preinstall": "npm install lodash-cli -g"
+    "test": "tape tests/*"
   },
   "dependencies": {
     "formidable": "1.0.14",

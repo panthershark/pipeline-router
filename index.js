@@ -1,6 +1,6 @@
 var util = require("util"),
     events = require('events'),
-    _ = require('./lodash.custom.min.js'),
+    _ = require('lodash'),
     HttpContext = require('./lib/httpcontext.js'),
     pipeline = require('node-pipeline'),
     formidable = require('formidable');
