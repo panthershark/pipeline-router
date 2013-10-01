@@ -1,6 +1,6 @@
 {
   "name": "pipeline-router",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "main": "index",
   "description": "Simplified and fast routing for your server without an accompanying framework.",
   "keywords": [
