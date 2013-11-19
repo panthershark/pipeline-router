@@ -75,6 +75,7 @@
         6
       ]
     },
+    "harness" : "mocha-tdd",
     "files": "tests/*.js"
   }
 }
