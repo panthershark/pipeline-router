@@ -1,11 +1,13 @@
 router
-========
+======
 
 Node.js module for simplifying http routing for your server without having to sign up for the accompanying framework.  
 
 This project strives to be a straight forward routing solution for common http applications where you need to parse urls and then activate some chain of logic.  Many other options either come with a much bigger framework or are trying to solve a bigger problem (like client side routing).
 
 This routing module is targeted for speed hungry people that want to be closer to the metal.  If you are not that type of person, then use express.js.
+
+[![browser support](https://ci.testling.com/tommydudebreaux/pipeline-router.png)](https://ci.testling.com/tommydudebreaux/pipeline-router)
 
 
 # Install

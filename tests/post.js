@@ -34,19 +34,18 @@ test("test post with multiple params", function(t) {
 	var req = new MockRequest({
         url: '/kitten/bubbles',
         headers: { host: 'localhost', 'content-type': 'application/x-www-form-urlencoded', 'content-length': body.length },
-        method: 'POST',
-        body: body
+        method: 'POST'
     });
   var res = new MockResponse();	
 
 	router.dispatch(req, res);
 
 	// this will write data to request body
-	req.end();
+	req.end(body);
 
   res.on('end', function(err, data) {
   	var json = JSON.parse(data.body);
-  	//console.log(buf);
+  	console.log(data);
 
   	t.ok(json.body.one, "ensure 'one' exists");
   	t.equals(json.body.one, 'foo', "Check value of 'one'");
@@ -65,15 +64,14 @@ test("test post with multiple params.  json post.", function(t) {
   var req = new MockRequest({
         url: '/kitten/bubbles',
         headers: { host: 'localhost', 'content-type': 'application/json', 'content-length': body.length },
-        method: 'POST',
-        body: body
+        method: 'POST'
     });
   var res = new MockResponse(); 
 
   router.dispatch(req, res);
 
   // this will write data to request body
-  req.end();
+  req.end(body);
 
   res.on('end', function(err, data) {
     var json = JSON.parse(data.body);

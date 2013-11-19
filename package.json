@@ -35,12 +35,25 @@
     "node-pipeline": "~0.5.2",
     "lodash": "~2.2.0",
     "hammock": "~0.1.1",
-    "guid": "0.0.10"
+    "guid": "tommydudebreaux/guid"
   },
   "devDependencies": {
     "optimist": "*",
     "tape": "~1.0.4"
   },
   "optionalDependencies": {},
-  "homepage": "http://vastdevblog.vast.com/"
+  "homepage": "http://vastdevblog.vast.com/",
+  "testling": {
+    "browsers": {
+      "ie": [ 8, 9, 10 ],
+      "ff": [ 25, "nightly" ],
+      "chrome": [ 31, "canary" ],
+      "safari": [ 5.1 ],
+      "android-browser": [ 4.2 ],
+      "opera": [ 17, "next" ],
+      "iphone": [ 6 ],
+      "ipad": [ 6 ]
+    },
+    "files": "tests/*.js"
+  }
 }
