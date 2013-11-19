@@ -9,6 +9,7 @@ This routing module is targeted for speed hungry people that want to be closer t
 
 [![browser support](https://ci.testling.com/tommydudebreaux/pipeline-router.png)](https://ci.testling.com/tommydudebreaux/pipeline-router)
 
+![travis-ci status](https://travis-ci.org/tommydudebreaux/pipeline-router.png)
 
 # Install
 ```
