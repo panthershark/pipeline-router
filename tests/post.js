@@ -1,7 +1,7 @@
 var Router = require('../index.js');
 var MockRequest = require('hammock').Request;
 var MockResponse = require('hammock').Response;
-var test = require('tape').test;
+var assert = require('assert');
 
 var routerFactory = {
 	create: function() {
@@ -28,61 +28,63 @@ var routerFactory = {
 	}
 };
 
-test("test post with multiple params", function(t) {
-	var router = routerFactory.create();
-  var body = new Buffer('one=foo&two=goo', 'utf-8');
-	var req = new MockRequest({
-        url: '/kitten/bubbles',
-        headers: { host: 'localhost', 'content-type': 'application/x-www-form-urlencoded', 'content-length': body.length },
-        method: 'POST'
+suite('router POST', function() {
+
+  test("test post with multiple params", function(done) {
+  	var router = routerFactory.create();
+    var body = new Buffer('one=foo&two=goo', 'utf-8');
+  	var req = new MockRequest({
+          url: '/kitten/bubbles',
+          headers: { host: 'localhost', 'content-type': 'application/x-www-form-urlencoded', 'content-length': body.length },
+          method: 'POST'
+      });
+    var res = new MockResponse();	
+
+  	router.dispatch(req, res);
+
+  	// this will write data to request body
+  	req.end(body);
+
+    res.on('end', function(err, data) {
+    	var json = JSON.parse(data.body);
+    	// console.log(data);
+
+    	assert.ok(json.body.one, "ensure 'one' exists");
+    	assert.equal(json.body.one, 'foo', "Check value of 'one'");
+
+    	assert.ok(json.body.two, "ensure 'two' exists");
+  		assert.equal(json.body.two, 'goo', "Check value of 'two'");
+
+    	done();
     });
-  var res = new MockResponse();	
-
-	router.dispatch(req, res);
-
-	// this will write data to request body
-	req.end(body);
-
-  res.on('end', function(err, data) {
-  	var json = JSON.parse(data.body);
-  	console.log(data);
-
-  	t.ok(json.body.one, "ensure 'one' exists");
-  	t.equals(json.body.one, 'foo', "Check value of 'one'");
-
-  	t.ok(json.body.two, "ensure 'two' exists");
-		t.equals(json.body.two, 'goo', "Check value of 'two'");
-
-  	t.end();
   });
-});
 
+  test("test post with multiple params.  json post.", function(done) {
+    var router = routerFactory.create();
+    var body = new Buffer('{ "one": "foo", "two": "goo" }', 'utf-8');
+    var req = new MockRequest({
+          url: '/kitten/bubbles',
+          headers: { host: 'localhost', 'content-type': 'application/json', 'content-length': body.length },
+          method: 'POST'
+      });
+    var res = new MockResponse(); 
 
-test("test post with multiple params.  json post.", function(t) {
-  var router = routerFactory.create();
-  var body = new Buffer('{ "one": "foo", "two": "goo" }', 'utf-8');
-  var req = new MockRequest({
-        url: '/kitten/bubbles',
-        headers: { host: 'localhost', 'content-type': 'application/json', 'content-length': body.length },
-        method: 'POST'
+    router.dispatch(req, res);
+
+    // this will write data to request body
+    req.end(body);
+
+    res.on('end', function(err, data) {
+      var json = JSON.parse(data.body);
+      //console.log(buf);
+
+      assert.ok(json.body.one, "ensure 'one' exists");
+      assert.equal(json.body.one, 'foo', "Check value of 'one'");
+
+      assert.ok(json.body.two, "ensure 'two' exists");
+      assert.equal(json.body.two, 'goo', "Check value of 'two'");
+
+      done();
     });
-  var res = new MockResponse(); 
-
-  router.dispatch(req, res);
-
-  // this will write data to request body
-  req.end(body);
-
-  res.on('end', function(err, data) {
-    var json = JSON.parse(data.body);
-    //console.log(buf);
-
-    t.ok(json.body.one, "ensure 'one' exists");
-    t.equals(json.body.one, 'foo', "Check value of 'one'");
-
-    t.ok(json.body.two, "ensure 'two' exists");
-    t.equals(json.body.two, 'goo', "Check value of 'two'");
-
-    t.end();
   });
 });

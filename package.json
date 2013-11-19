@@ -28,7 +28,7 @@
     "node": ">=0.6.0"
   },
   "scripts": {
-    "test": "tape tests/*"
+    "test": "mocha -R spec -u tdd tests/*.js"
   },
   "dependencies": {
     "formidable": "1.0.14",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "optimist": "*",
-    "tape": "~1.0.4"
+    "mocha": "~1.14.0"
   },
   "optionalDependencies": {},
   "homepage": "http://vastdevblog.vast.com/",
