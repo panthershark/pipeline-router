@@ -1,6 +1,6 @@
 {
   "name": "pipeline-router",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "main": "index",
   "description": "Simplified and fast routing for your server without an accompanying framework.",
   "keywords": [
@@ -75,7 +75,7 @@
         6
       ]
     },
-    "harness" : "mocha-tdd",
+    "harness": "mocha-tdd",
     "files": "tests/*.js"
   }
 }
