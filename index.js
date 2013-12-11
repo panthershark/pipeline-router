@@ -84,7 +84,10 @@ Router.prototype.use = function(method, urlformat, options, handle) {
   options.handle = _.last(arguments);
   options.method = method.toUpperCase();
   options.query = _.pick(this.query, options.query);
-  options.timeout = (options.timeout || this.timeout); // default 30s timeout
+
+  if (options.timeout == null) {
+    options.timeout = this.timeout; // default 30s timeout
+  }
 
   // support plain old regex
   if (urlformat instanceof RegExp) {
