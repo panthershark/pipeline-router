@@ -32,9 +32,9 @@
   },
   "dependencies": {
     "formidable": "1.0.14",
-    "node-pipeline": "~0.5.2",
-    "lodash": "~2.2.0",
-    "hammock": "~0.1.1",
+    "node-pipeline": "~1.0.1",
+    "lodash": "~2.4.1",
+    "hammock": "~0.1.5",
     "guid": "0.0.11"
   },
   "devDependencies": {
