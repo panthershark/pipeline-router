@@ -14,13 +14,13 @@ var Router = function() {
     that.parsed = true;
   });
 
-  this.plRouter.on('error', function(err, results){ 
+  this.plRouter.on('error', function(err, results){
     if (err) {
       that.emit('error', err, results);
     }
   });
 
-}; 
+};
 
 util.inherits(Router, events.EventEmitter);
 
@@ -44,9 +44,9 @@ Router.prototype.dispatch = function(request, response) {
 
     form.on('field', function(field, value) {
       httpContext.body = httpContext.body || {};
-      httpContext.body[field] = value;            
+      httpContext.body[field] = value;
     });
-    
+
     form.on('error', function(err) {
       httpContext.body = err;
       that.emit('body', err);
@@ -65,7 +65,7 @@ Router.prototype.dispatch = function(request, response) {
 
     that.emit('end', err, results);
 
-    if ((!matched || err) && res) {    
+    if ((!matched || err) && res) {
       res.statusCode = 404;
       res.write("No matching route or failed route");
       res.end(err ? err.stack : '');
@@ -117,57 +117,69 @@ Router.prototype.use = function(method, urlformat, options, handle) {
   this.plRouter.use(function(data, next) {
     var matched = data[0].matched,
         httpContext = data[0].httpContext,
-        pathname = httpContext.url.pathname;
+        fragment = null;
 
-    if ( !matched && httpContext.request.method === options.method && options.urlformat.test(pathname) ) {
-      
-      // rest matched. lets set flag
+    // quick fail check
+    if (matched || httpContext.request.method !== options.method) {
+      next();
+    }
+
+    // evaluate hash for rest match
+    if (httpContext.url.hash && options.urlformat.test(httpContext.url.hash.slice(1)) ) {
+      // hash matched. lets set flag
       matched = true;
+      fragment = httpContext.url.hash.slice(1);
+    }
 
+    // evaluate pathname for rest match
+    else if (options.urlformat.test(httpContext.url.pathname) ) {
+      // pathname matched. lets set flag
+      matched = true;
+      fragment = httpContext.url.pathname;
+    }
+
+
+    if (matched) {
       // validate query against params.  if any of the regex fail, then matched will change to false.
       _.each(options.query, function(regex, key) {
         matched = matched && regex.test(httpContext.url.query[key]);
       });
+    }
 
-      // stop trying to match if query matched too
-      if (matched) {
-        httpContext.query = httpContext.url.query;
-        data[0].matched = true;
-        next(null, options);
+    // stop trying to match if query matched too
+    if (matched) {
+      httpContext.query = httpContext.url.query;
+      data[0].matched = true;
+      next(null, options);
 
-        // send to handler
-        httpContext.params = that.parseUrl(pathname, options.paramMap);
-        emitEvaluateEvent(httpContext, true);
+      // send to handler
+      httpContext.params = that.parseUrl(fragment, options.paramMap);
+      emitEvaluateEvent(httpContext, true);
 
-        if (options.timeout) {
-          var res = httpContext.response;
+      if (options.timeout) {
+        var res = httpContext.response;
 
-          if (res) {
-            var resTimeout = setTimeout(function() {
+        if (res) {
+          var resTimeout = setTimeout(function() {
 
-              if (!res.headersSent) {
-                res.writeHead(500, { 'Content-Type': 'text/html' });
-              }
-              res.end('Request timed out');
+            if (!res.headersSent) {
+              res.writeHead(500, { 'Content-Type': 'text/html' });
+            }
+            res.end('Request timed out');
 
-            }, options.timeout);
+          }, options.timeout);
 
-            res.on('finish', clearTimeout.bind(null, resTimeout));
-          }
-        }
-
-        if (httpContext.request.method == 'POST' && !that.parsed) {
-          that.on('body', function() {
-            options.handle(httpContext);
-          });
-        }
-        else {
-          options.handle(httpContext);
+          res.on('finish', clearTimeout.bind(null, resTimeout));
         }
       }
+
+      if (httpContext.request.method == 'POST' && !that.parsed) {
+        that.on('body', function() {
+          options.handle(httpContext);
+        });
+      }
       else {
-        emitEvaluateEvent(httpContext, false);
-        next();
+        options.handle(httpContext);
       }
     }
     else {
@@ -190,7 +202,7 @@ Router.prototype.param = function(arg0, arg1) {
   if (_.isArray(arg0)) {
     params = arg0;
   }
-  else {  
+  else {
     // insert the single param to the array for concat below.
     params.push({ name: arg0, regex: arg1 });
   }
@@ -240,7 +252,7 @@ Router.prototype.parseUrl = function(url, paramMap) {
 var regexSplit = /(\?|\/)([^\?^\/]+)/g;
 Router.prototype.parseParams = function(s) {
   s = s || '';
-    
+
   var restParams = s.match(regexSplit),
       that = this,
       paramMap = [],
