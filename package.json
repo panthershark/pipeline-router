@@ -13,13 +13,12 @@
   "author": {
     "name": "Tommy Messbauer",
     "email": "tom.messbauer@gmail.com",
-    "web": "http://www.vast.com",
-    "twitter": "tommydudebreaux"
+    "twitter": "tommymessbauer"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git@github.com:tommydudebreaux/pipeline-router.git"
+    "url": "git@github.com:tommymessbauer/pipeline-router.git"
   },
   "directories": {
     "tests": "tests"
@@ -42,7 +41,6 @@
     "mocha": "~1.14.0"
   },
   "optionalDependencies": {},
-  "homepage": "http://vastdevblog.vast.com/",
   "testling": {
     "browsers": {
       "ie": [
