@@ -239,7 +239,7 @@ Router.prototype.parseUrl = function(url, paramMap) {
     if (param && pmap) {
       var m = pmap.regex.exec(param);
       if (m) {
-        ret[pmap.name] = _.last(m);
+        ret[pmap.name] = decodeURIComponent(_.last(m));
       }
     }
   });

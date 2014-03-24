@@ -9,7 +9,7 @@ var routerFactory = {
     var router = new Router();
 
     router.param('zip', /zip-(\d{5})/);
-    router.param('item', /(\w+)/);
+    router.param('item', /(.+)/);
     router.qparam('puppy', /(true|false)/);
 
 
@@ -172,6 +172,33 @@ suite('router GET', function() {
 
       // gold value is the return of the item route, not the dogs route.
       assert.deepEqual(JSON.parse(data.body), {"zip":"12345","item":"dogs"}, 'Returned object from route should match gold.');
+      done();
+
+    });
+
+    router.on('match', function(data) {
+      // console.log(util.inspect(data));
+
+      assert.ok(data.httpContext, 'Context should exist');
+      assert.ok(data.matched, 'Route should match');
+    });
+
+    router.dispatch(req, res);
+  });
+
+  test('Restful route with encoding', function(done) {
+    var router = routerFactory.create();
+    var req = new MockRequest({
+          url: '/foo/zip-12345/puppy%20dogs',
+          headers: { host: 'localhost' },
+          method: 'GET'
+      });
+    var res = new MockResponse(); 
+
+    res.on('end', function(err, data) {
+console.log(data.body);
+      assert.ifError(err, 'Should not return err');
+      assert.deepEqual(JSON.parse(data.body), { zip: '12345', item: 'puppy dogs' }, 'Returned object from route should match gold.');
       done();
 
     });
