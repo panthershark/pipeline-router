@@ -119,11 +119,6 @@ Router.prototype.use = function(method, urlformat, options, handle) {
         httpContext = data[0].httpContext,
         fragment = null;
 
-    // quick fail check
-    if (matched || httpContext.request.method !== options.method) {
-      next();
-    }
-
     // evaluate hash for rest match
     if (httpContext.url.hash && options.urlformat.test(httpContext.url.hash.slice(1)) ) {
       // hash matched. lets set flag
