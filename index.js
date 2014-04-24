@@ -1,9 +1,9 @@
 var util = require("util"),
-    events = require('events'),
-    _ = require('lodash'),
-    HttpContext = require('./lib/httpcontext.js'),
-    pipeline = require('node-pipeline'),
-    formidable = require('formidable');
+  events = require('events'),
+  _ = require('lodash'),
+  HttpContext = require('./lib/httpcontext.js'),
+  pipeline = require('node-pipeline'),
+  formidable = require('formidable');
 
 var Router = function() {
   var that = this;
@@ -14,7 +14,7 @@ var Router = function() {
     that.parsed = true;
   });
 
-  this.plRouter.on('error', function(err, results){
+  this.plRouter.on('error', function(err, results) {
     if (err) {
       that.emit('error', err, results);
     }
@@ -34,7 +34,7 @@ Router.prototype.reset = function() {
 };
 
 Router.prototype.dispatch = function(request, response) {
-  this.reset();  // reset everything.
+  this.reset(); // reset everything.
   var that = this;
   var httpContext = this.httpContext = new HttpContext(request, response);
 
@@ -61,7 +61,7 @@ Router.prototype.dispatch = function(request, response) {
 
   this.plRouter.on('end', function(err, results) {
     var matched = results[0].matched,
-        res = results[0].httpContext.response;
+      res = results[0].httpContext.response;
 
     that.emit('end', err, results);
 
@@ -72,14 +72,16 @@ Router.prototype.dispatch = function(request, response) {
     }
   });
 
-  this.plRouter.execute({ httpContext: httpContext });
+  this.plRouter.execute({
+    httpContext: httpContext
+  });
 };
 
 
 
 Router.prototype.use = function(method, urlformat, options, handle) {
   var options = options || {},
-      that = this;
+    that = this;
 
   options.handle = _.last(arguments);
   options.method = method.toUpperCase();
@@ -92,8 +94,7 @@ Router.prototype.use = function(method, urlformat, options, handle) {
   // support plain old regex
   if (urlformat instanceof RegExp) {
     options.urlformat = urlformat;
-  }
-  else {
+  } else {
     _.extend(options, this.parseParams(urlformat));
   }
 
@@ -116,23 +117,24 @@ Router.prototype.use = function(method, urlformat, options, handle) {
 
   this.plRouter.use(function(data, next) {
     var matched = data[0].matched,
-        httpContext = data[0].httpContext,
-        fragment = null;
+      httpContext = data[0].httpContext,
+      fragment = null;
 
     // quick fail check
     if (matched || httpContext.request.method !== options.method) {
       next();
+      return;
     }
 
     // evaluate hash for rest match
-    if (httpContext.url.hash && options.urlformat.test(httpContext.url.hash.slice(1)) ) {
+    if (httpContext.url.hash && options.urlformat.test(httpContext.url.hash.slice(1))) {
       // hash matched. lets set flag
       matched = true;
       fragment = httpContext.url.hash.slice(1);
     }
 
     // evaluate pathname for rest match
-    else if (options.urlformat.test(httpContext.url.pathname) ) {
+    else if (options.urlformat.test(httpContext.url.pathname)) {
       // pathname matched. lets set flag
       matched = true;
       fragment = httpContext.url.pathname;
@@ -163,7 +165,9 @@ Router.prototype.use = function(method, urlformat, options, handle) {
           var resTimeout = setTimeout(function() {
 
             if (!res.headersSent) {
-              res.writeHead(500, { 'Content-Type': 'text/html' });
+              res.writeHead(500, {
+                'Content-Type': 'text/html'
+              });
             }
             res.end('Request timed out');
 
@@ -177,12 +181,10 @@ Router.prototype.use = function(method, urlformat, options, handle) {
         that.on('body', function() {
           options.handle(httpContext);
         });
-      }
-      else {
+      } else {
         options.handle(httpContext);
       }
-    }
-    else {
+    } else {
       emitEvaluateEvent(httpContext, false);
       next();
     }
@@ -201,10 +203,12 @@ Router.prototype.param = function(arg0, arg1) {
 
   if (_.isArray(arg0)) {
     params = arg0;
-  }
-  else {
+  } else {
     // insert the single param to the array for concat below.
-    params.push({ name: arg0, regex: arg1 });
+    params.push({
+      name: arg0,
+      regex: arg1
+    });
   }
 
   // convert nulls and strings to regex
@@ -227,8 +231,8 @@ Router.prototype.param = function(arg0, arg1) {
 
 Router.prototype.parseUrl = function(url, paramMap) {
   var restParams = url.split('/'),
-      ret = {},
-      that = this;
+    ret = {},
+    that = this;
 
   if (restParams[0] === "") {
     restParams.splice(0, 1);
@@ -254,9 +258,9 @@ Router.prototype.parseParams = function(s) {
   s = s || '';
 
   var restParams = s.match(regexSplit),
-      that = this,
-      paramMap = [],
-      urlformat = [];
+    that = this,
+    paramMap = [],
+    urlformat = [];
 
   if (!restParams || restParams.length === 0) {
     restParams = [s];
@@ -264,15 +268,16 @@ Router.prototype.parseParams = function(s) {
 
   // replace named params with corresponding regexs and build paramMap.
   _.each(restParams, function(str, i) {
-    var param = _.find(that.params, function(p) { return str.substring(1) === ':' + p.name; });
+    var param = _.find(that.params, function(p) {
+      return str.substring(1) === ':' + p.name;
+    });
 
     if (param) {
       paramMap.push(param);
       var rstr = param.regex.toString();
       urlformat.push('\\/' + (str[0] === '?' ? '?' : '')); // push separator (double backslash escapes the ? or /)
-      urlformat.push(rstr.substring(1, rstr.length - 1));  // push regex
-    }
-    else {
+      urlformat.push(rstr.substring(1, rstr.length - 1)); // push regex
+    } else {
       paramMap.push(null);
       urlformat.push(str);
     }
