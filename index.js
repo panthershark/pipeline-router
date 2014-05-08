@@ -39,7 +39,7 @@ Router.prototype.dispatch = function(request, response) {
   var httpContext = this.httpContext = new HttpContext(request, response);
 
   // parse body on post
-  if (httpContext.request.method == 'POST') {
+  if (/(POST|PUT)/i.test(httpContext.request.method) ) {
     var form = new formidable.IncomingForm();
 
     form.on('field', function(field, value) {
@@ -58,6 +58,8 @@ Router.prototype.dispatch = function(request, response) {
 
     form.parse(httpContext.request);
   }
+  
+
 
   this.plRouter.on('end', function(err, results) {
     var matched = results[0].matched,
@@ -177,7 +179,7 @@ Router.prototype.use = function(method, urlformat, options, handle) {
         }
       }
 
-      if (httpContext.request.method == 'POST' && !that.parsed) {
+      if (/(POST|PUT)/i.test(httpContext.request.method) && !that.parsed) {
         that.on('body', function() {
           options.handle(httpContext);
         });
