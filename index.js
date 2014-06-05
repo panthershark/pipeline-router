@@ -39,7 +39,7 @@ Router.prototype.dispatch = function(request, response) {
   var httpContext = this.httpContext = new HttpContext(request, response);
 
   // parse body on post
-  if (/(POST|PUT)/i.test(httpContext.request.method) && /(urlencoded|json)/i.test(httpContext.request.headers['content-type'])) {
+  if (/(POST|PUT)/i.test(httpContext.request.method) && /(urlencoded|json|multipart\/form-data)/i.test(httpContext.request.headers['content-type'])) {
     var form = new formidable.IncomingForm();
 
     form.on('field', function(field, value) {
@@ -52,13 +52,20 @@ Router.prototype.dispatch = function(request, response) {
       that.emit('body', err);
     });
 
+    form.on('file', function(name, file) {
+      httpContext.files = httpContext.files || [];
+      httpContext.files.push({
+        name: file.name,
+        file: file
+      });
+    });
+
     form.on('end', function() {
       that.emit('body', httpContext.body);
     });
 
     form.parse(httpContext.request);
-  }
-  else {
+  } else {
     httpContext.body = [];
 
     httpContext.request.on('data', function(chunk) {
