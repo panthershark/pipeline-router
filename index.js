@@ -1,14 +1,22 @@
 var util = require("util"),
   events = require('events'),
   _ = require('lodash'),
+  path = require('path'),
   HttpContext = require('./lib/httpcontext.js'),
   pipeline = require('node-pipeline'),
-  formidable = require('formidable');
+  formidable = require('formidable'),
+  mkdirp = require('mkdirp'),
+  fs = require('fs');
 
 var Router = function() {
   var that = this;
   this.plRouter = pipeline.create();
   this.reset();
+  this.uploadDir = '';
+
+  try {
+    this.uploadDir = path.join(process.cwd(), '/tmp/fileuploads');
+  } catch (e) {}
 
   this.on('body', function() {
     that.parsed = true;
@@ -41,6 +49,12 @@ Router.prototype.dispatch = function(request, response) {
   // parse body on post
   if (/(POST|PUT)/i.test(httpContext.request.method) && /(urlencoded|json|multipart\/form-data)/i.test(httpContext.request.headers['content-type'])) {
     var form = new formidable.IncomingForm();
+
+    if (!fs.existsSync(that.uploadDir)) {
+      mkdirp.sync(that.uploadDir);
+    }
+
+    form.uploadDir = that.uploadDir;
 
     form.on('field', function(field, value) {
       httpContext.body = httpContext.body || {};
