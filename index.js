@@ -156,8 +156,16 @@ Router.prototype.use = function(method, urlformat, options, handle) {
 
     // quick fail check
     if (matched || httpContext.request.method !== options.method) {
-      next();
-      return;
+        
+    	// check if httpContext.request.method isn't HEAD and router method isn't GET
+        if (httpContext.request.method != 'HEAD' || options.method != 'GET') {
+            next();
+            return;
+        }
+        else {
+            // HEAD method is identical to GET but MUST NOT return a message-body in the response
+            httpContext.response._hasBody = false;
+        }
     }
 
     // evaluate hash for rest match
