@@ -113,13 +113,14 @@ Router.prototype.dispatch = function(request, response) {
 
 
 
-Router.prototype.use = function(method, urlformat, options, handle) {
+Router.prototype.use = function(method, urlformat, options, formats, handle) {
   var options = options || {},
     that = this;
-
+  
   options.handle = _.last(arguments);
   options.method = method.toUpperCase();
   options.query = _.pick(this.query, options.query);
+  options.formats = formats;
 
   if (options.timeout == null) {
     options.timeout = this.timeout; // default 30s timeout
@@ -156,7 +157,7 @@ Router.prototype.use = function(method, urlformat, options, handle) {
 
     // quick fail check
     if (matched || httpContext.request.method !== options.method) {
-        
+
     	// check if httpContext.request.method isn't HEAD and router method isn't GET
         if (httpContext.request.method != 'HEAD' || options.method != 'GET') {
             next();
@@ -166,6 +167,26 @@ Router.prototype.use = function(method, urlformat, options, handle) {
             // HEAD method is identical to GET but MUST NOT return a message-body in the response
             httpContext.response._hasBody = false;
         }
+    }
+
+    // check if we have formats field in router config - example "formats": ["json, html, txt, xml"],
+    if (!_.isUndefined(options.formats) && _.isArray(options.formats) && !_.isEmpty(options.formats)) {
+
+    	_.forEach(options.formats, function(format) {
+
+    		var dotFormat = "." + format; // .json OR .html (/car-dealer/CA/Acura.html OR /car-dealer/CA/Acura.js)
+    		var dotFormatIndex = httpContext.url.pathname.indexOf(dotFormat); // index of current format
+
+    		// if current format is part of httpContext.url.pathname (/car-dealer/CA/Acura.json)
+    		if (dotFormatIndex !== -1) {
+
+    			// set format type to httpContext
+    			httpContext.format = format;
+
+    			// remove dotFormat from pathname (/car-dealer/CA/Acura)
+    			httpContext.url.pathname = httpContext.url.pathname.substr(0, dotFormatIndex);
+    		}
+    	});
     }
 
     // evaluate hash for rest match
