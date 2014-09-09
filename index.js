@@ -46,6 +46,8 @@ Router.prototype.dispatch = function(request, response) {
   var that = this;
   var httpContext = this.httpContext = new HttpContext(request, response);
 
+  httpContext.format = {}; // initialize format object
+
   // parse body on post
   if (/(POST|PUT)/i.test(httpContext.request.method) && /(urlencoded|json|multipart\/form-data)/i.test(httpContext.request.headers['content-type'])) {
     var form = new formidable.IncomingForm();
@@ -181,10 +183,11 @@ Router.prototype.use = function(method, urlformat, options, formats, handle) {
     		if (dotFormatIndex !== -1) {
 
     			// set format type to httpContext
-    			httpContext.format = format;
+    			httpContext.format[format] = true;
 
-    			// remove dotFormat from pathname (/car-dealer/CA/Acura)
+    			// remove dotFormat from path and pathname (/car-dealer/CA/Acura)
     			httpContext.url.pathname = httpContext.url.pathname.substr(0, dotFormatIndex);
+    			httpContext.url.path = httpContext.url.path.substr(0, dotFormatIndex);
     		}
     	});
     }
